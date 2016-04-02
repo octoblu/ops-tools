@@ -28,3 +28,11 @@ If you update any of the tools in here, you'll need to:
 1. Tag it `git tag v1.0.0`
 2. Draft a new release in [ops-tools releases](https://github.com/octoblu/ops-tools/releases)
 3. Update the appropriate formula in  [octoblu/homebrew-tools](https://github.com/octoblu/homebrew-tools)
+4. Test out the formula:
+
+```shell
+brew update
+brew install octoblu/tools/<formula>    # prefix 'octoblu/tools/' is only nescessary
+                                        # in case there's an identically named
+                                        # package in the base homebrew tap
+```
