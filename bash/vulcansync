@@ -1,5 +1,7 @@
 #!/bin/bash
 
+SCRIPT_VERSION="v1.1.0"
+
 describe_aws_instance() {
   aws ec2 describe-instances \
     --filters "Name=tag:Name,Values=service-cluster"
@@ -93,7 +95,14 @@ usage(){
   echo "USAGE: vulcansync <load/l> <project-name> [vulcan-url]"
   echo ""
   echo "example: vulcansync octoblu-governator-service"
-  exit 1
+  echo ""
+  echo "  -h, --help      print this help text"
+  echo "  -v, --version   print the version"
+  echo ""
+}
+
+version(){
+  echo "${SCRIPT_VERSION}"
 }
 
 validate_cmd() {
@@ -111,11 +120,18 @@ main(){
   local cmd="$1"
   local project="$2"
   local vulcan_url="$3"
-  validate_cmd "$cmd"
 
-  if [ -z "$project" -o "$project" == "--help" -o "$project" == "-h" -o "$vulcan_url" == "--help" -o "$vulcan_url" == "-h" ]; then
+  if [ "$cmd" == "--help" -o "$cmd" == "-h" ]; then
     usage
+    exit 1
   fi
+
+  if [ "$cmd" == "--version" -o "$cmd" == "-v" ]; then
+    version
+    exit 1
+  fi
+
+  validate_cmd "$cmd"
 
   if [ -n "$vulcan_url" ]; then
     do_vulcan_sync "$vulcan_url" "$project" "$cmd"
@@ -136,7 +152,6 @@ main(){
   local exit_code=$?
 
   kill_ssh_tunnel_job "$ssh_tunnel_job"
-
   exit $exit_code
 }
 

@@ -1,5 +1,7 @@
 #!/bin/bash
 
+SCRIPT_VERSION="v1.1.0"
+
 describe_aws_instance() {
   aws ec2 describe-instances \
     --filters "Name=tag:Name,Values=service-cluster"
@@ -60,11 +62,18 @@ assert_port_free() {
 }
 
 usage(){
-  echo "USAGE: majorsync <dump/gd/gload/l/printfs/pf/printetcd/pe> <project-name>"
+  echo "USAGE: majorsync [options] <dump/gd/gload/l/printfs/pf/printetcd/pe> <project-name>"
   echo ""
-  echo "example: majoreload governator-service"
+  echo "example: majorsync load governator-service"
   echo "use env NAMESPACE to change from 'octoblu' to something else"
-  exit 1
+  echo ""
+  echo "  -h, --help      print this help text"
+  echo "  -v, --version   print the version"
+  echo ""
+}
+
+version(){
+  echo "${SCRIPT_VERSION}"
 }
 
 validate_cmd() {
@@ -88,23 +97,26 @@ validate_cmd() {
 
   echo "Command must be one of dump/gd/gload/l/printfs/pf/printetcd/pe"
   usage
+  exit 1
 }
 
 main(){
   local cmd="$1"
   local project="$2"
-  local namespace="$NAMESPACE"
-  
-  validate_cmd "$cmd"
+  local namespace="${NAMESPACE:-octoblu}"
 
-  if [ -z "$project" -o "$project" == "--help" -o "$project" == "-h" ]; then
+
+  if [ "$cmd" == "--help" -o "$cmd" == "-h" ]; then
     usage
+    exit 1
   fi
 
-  if [ -z "$NAMESPACE" ]; then
-    namespace="octoblu"
+  if [ "$cmd" == "--version" -o "$cmd" == "-v" ]; then
+    version
+    exit 1
   fi
 
+  validate_cmd "$cmd"
   assert_port_free
 
   local ip_address="$(get_major_ip)"

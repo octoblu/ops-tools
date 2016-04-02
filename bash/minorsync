@@ -1,5 +1,7 @@
 #!/bin/bash
 
+SCRIPT_VERSION="v1.1.0"
+
 describe_aws_instance() {
   aws ec2 describe-instances \
     --filters "Name=tag:Name,Values=service-minor-cluster"
@@ -60,11 +62,18 @@ assert_port_free() {
 }
 
 usage(){
-  echo "USAGE: minorsync <dump/gd/gload/l/printfs/pf/printetcd/pe> <project-name>"
+  echo "USAGE: minorsync [options] <dump/gd/gload/l/printfs/pf/printetcd/pe> <project-name>"
   echo ""
-  echo "example: minoreload governator-service"
+  echo "example: minorsync load governator-service"
   echo "use env NAMESPACE to change from 'octoblu' to something else"
-  exit 1
+  echo ""
+  echo "  -h, --help      print this help text"
+  echo "  -v, --version   print the version"
+  echo ""
+}
+
+version(){
+  echo "${SCRIPT_VERSION}"
 }
 
 validate_cmd() {
@@ -93,18 +102,19 @@ validate_cmd() {
 main(){
   local cmd="$1"
   local project="$2"
-  local namespace="$NAMESPACE"
+  local namespace="${NAMESPACE:-octoblu}"
+
+  if [ "$cmd" == "--help" -o "$cmd" == "-h" ]; then
+    usage
+    exit 1
+  fi
+
+  if [ "$cmd" == "--version" -o "$cmd" == "-v" ]; then
+    version
+    exit 1
+  fi
 
   validate_cmd "$cmd"
-
-  if [ -z "$project" -o "$project" == "--help" -o "$project" == "-h" ]; then
-    usage
-  fi
-
-  if [ -z "$NAMESPACE" ]; then
-    namespace="octoblu"
-  fi
-
   assert_port_free
 
   local ip_address="$(get_minor_ip)"

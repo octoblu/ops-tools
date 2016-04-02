@@ -1,6 +1,6 @@
 #!/bin/bash
 
-SCRIPT_VERSION="v1.0.0"
+SCRIPT_VERSION="v1.1.0"
 
 get_machines() {
   aws ec2 describe-instances \
@@ -22,7 +22,7 @@ run_on_machine() {
 }
 
 usage(){
-  echo "./run_on_major [options] <some-command>"
+  echo "USAGE: ./run_on_major [options] <some-command>"
   echo ""
   echo "  -h, --help      print this help text"
   echo "  -v, --version   print the version"
