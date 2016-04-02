@@ -11,12 +11,14 @@ The easiest way to obtain these tools is through homebrew
 brew tap octoblu/tools
 
 # Then install the tools
-brew install majorsync minorsync vulcansync
+brew install majorsync minorsync vulcansync run_on_major run_on_minor
 
 # Or if you just want a subset of them
 brew install majorsync
 brew install minorsync
 brew install vulcansync
+brew install run_on_major
+brew install run_on_minor
 ```
 
 ## Contributing
