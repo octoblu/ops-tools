@@ -1,6 +1,6 @@
 #!/bin/bash
 
-SCRIPT_VERSION="v1.1.0"
+SCRIPT_VERSION="v1.1.1"
 
 describe_aws_instance() {
   aws ec2 describe-instances \
@@ -106,12 +106,12 @@ main(){
 
   if [ "$cmd" == "--help" -o "$cmd" == "-h" ]; then
     usage
-    exit 1
+    exit 0
   fi
 
   if [ "$cmd" == "--version" -o "$cmd" == "-v" ]; then
     version
-    exit 1
+    exit 0
   fi
 
   validate_cmd "$cmd"
