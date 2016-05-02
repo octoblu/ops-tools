@@ -1,6 +1,6 @@
 #!/bin/bash
 
-SCRIPT_VERSION="v1.1.1"
+SCRIPT_VERSION="v2.0.0"
 
 describe_aws_instance() {
   aws ec2 describe-instances \
@@ -92,9 +92,13 @@ sync_middleware(){
 }
 
 usage(){
-  echo "USAGE: vulcansync <load/l> <project-name> [vulcan-url]"
+  echo "USAGE: vulcansync <load/l> <project-name> [project-name]..."
   echo ""
   echo "example: vulcansync octoblu-governator-service"
+  echo ""
+  echo "the vulcan url can be overridden using VULCAN_URL."
+  echo "vulcansync will not establish an SSH connection if"
+  echo "a VULCAN_URL is specified"
   echo ""
   echo "  -h, --help      print this help text"
   echo "  -v, --version   print the version"
@@ -114,27 +118,34 @@ validate_cmd() {
 
   echo "Command must be one of load/l"
   usage
+  exit 1
 }
 
 main(){
-  local cmd="$1"
-  local project="$2"
-  local vulcan_url="$3"
+  local vulcan_url="$VULCAN_URL"
+  local cmd="$1"; shift
+  local projects=( $@ )
 
-  if [ "$cmd" == "--help" -o "$cmd" == "-h" ]; then
-    usage
-    exit 0
-  fi
+  echo "cmd: $cmd"
 
-  if [ "$cmd" == "--version" -o "$cmd" == "-v" ]; then
-    version
-    exit 0
-  fi
+  for project in "${projects[@]}"; do
+    if [ "$cmd" == "--help" -o "$cmd" == "-h" ]; then
+      usage
+      exit 0
+    fi
+
+    if [ "$cmd" == "--version" -o "$cmd" == "-v" ]; then
+      version
+      exit 0
+    fi
+  done
 
   validate_cmd "$cmd"
 
   if [ -n "$vulcan_url" ]; then
-    do_vulcan_sync "$vulcan_url" "$project" "$cmd"
+    for project in "${projects[@]}"; do
+      do_vulcan_sync "$vulcan_url" "$project" "$cmd"
+    done
     exit $?
   fi
 
@@ -148,11 +159,18 @@ main(){
   echo -n "Waiting for tunnel"
   wait_for_tunnel
   echo "Tunnel established, working."
-  do_vulcan_sync http://localhost:61222 "$project" "$cmd"
-  local exit_code=$?
+  for project in "${projects[@]}"; do
+    do_vulcan_sync http://localhost:61222 "$project" "$cmd"
+    local exit_code=$?
+
+    if [ "$exit_code" != "0" ]; then
+      echo "Fatal Error: $exit_code"
+      echo $exit_code
+    fi
+  done
 
   kill_ssh_tunnel_job "$ssh_tunnel_job"
-  exit $exit_code
+  exit 0
 }
 
 main $@
